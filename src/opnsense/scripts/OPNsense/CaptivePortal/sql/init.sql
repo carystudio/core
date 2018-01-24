@@ -30,7 +30,10 @@ create table session_info (
 ,     packets_out integer default (0)
 ,     bytes_in integer default (0)
 ,     bytes_out integer default (0)
+,     cur_bytes_in integer default (0)
+,     cur_bytes_out integer default (0)
 ,     last_accessed integer
+,     last_accounting integer
 ,     primary key (zoneid, sessionid)
 );
 
@@ -49,3 +52,25 @@ create table accounting_state (
 ,     state varchar
 ,     primary key (zoneid, sessionid)
 ) ;
+
+--  portal users
+create table users (
+      username varchar
+,     password varchar
+,     expire_time number
+,     remain_time number
+,     concurrent_logins integer default (0)
+,     created number
+,     deleted integer default (0)
+,     primary key (username)
+);
+
+--  wanwhiteset record
+create table wanwhiteset (
+      ip varchar
+,     fwtable number
+,     create_time number
+,     expire_time number
+,     delete_time number default (0)
+,     primary key (ip,fwtable)
+);

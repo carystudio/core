@@ -98,7 +98,7 @@ class DB(object):
             result.append({'sessionId': row[0], 'authenticated_via': row[1]})
         return result
 
-    def add_client(self, zoneid, authenticated_via, username, ip_address, mac_address):
+    def add_client(self, zoneid, authenticated_via, username, ip_address, mac_address, sessionid):
         """ add a new client to the captive portal administration
         :param zoneid: cp zone number
         :param authenticated_via: name/id of the authenticator or ---ip--- / ---mac--- for authentication by address
@@ -114,7 +114,11 @@ class DB(object):
         response['ipAddress'] = ip_address
         response['macAddress'] = mac_address
         response['startTime'] = time.time()  # record creation = sign-in time
-        response['sessionId'] = base64.b64encode(os.urandom(16))  # generate a new random session id
+        if '0' == sessionid:
+            response['sessionId'] = base64.b64encode(os.urandom(16))  # generate a new random session id
+        else:
+            response['sessionId'] = sessionid
+
 
         cur = self._connection.cursor()
         # set cp_client as deleted in case there's already a user logged-in at this ip address.
@@ -145,6 +149,34 @@ class DB(object):
                     """, {'zoneid': zoneid, 'sessionid': sessionid, 'ip_address': ip_address})
         self._connection.commit()
 
+    def del_wanwhiteset(self, zoneid, fwtable, ip, mark):
+        """ delete wanwhiteset
+            :param zoneid: zone id
+            :param fwtable: table number
+            :param ip: ip address
+            :return: wanwhiteset info before removal or None if wanwhiteset not found
+        """
+        cur = self._connection.cursor()
+        cur.execute("select  ip, fwtable, create_time, expire_time, delete_time from wanwhiteset where fwtable = :fwtable and ip = :ip",
+            {'fwtable': fwtable, 'ip': ip})
+        data = cur.fetchall()
+        if len(data) > 0:
+            wanwhiteset_info = dict()
+            for fields in cur.description:
+                wanwhiteset_info[fields[0]] = data[0][len(wanwhiteset_info)]
+            # remove client
+            if True == mark:
+                cur.execute("update wanwhiteset set delete_time = :deletetime where fwtable = :fwtable and ip = :ip",
+                    {'deletetime': int(time.time()),'fwtable': fwtable, 'ip': ip})
+            else:
+                cur.execute("delete from wanwhiteset where fwtable = :fwtable and ip = :ip",
+                    {'fwtable': fwtable, 'ip': ip})
+            self._connection.commit()
+
+            return wanwhiteset_info
+        else:
+            return None
+
     def del_client(self, zoneid, sessionid):
         """ mark (administrative) client for removal
         :param zoneid: zone id
@@ -171,6 +203,30 @@ class DB(object):
             return session_info
         else:
             return None
+
+    def list_wanwhiteset(self):
+        """ return list of authed wanwhiteset
+            :return: list of clients
+        """
+        result = list()
+        fieldnames = list()
+        cur = self._connection.cursor()
+        cur.execute("select ip, fwtable, create_time, expire_time, delete_time from wanwhiteset")
+        while True:
+            # fetch field names
+            if len(fieldnames) == 0:
+                for fields in cur.description:
+                    fieldnames.append(fields[0])
+
+            row = cur.fetchone()
+            if row is None:
+                break
+            else:
+                record = dict()
+                for idx in range(len(row)):
+                    record[fieldnames[idx]] = row[idx]
+                result.append(record)
+        return result
 
     def list_clients(self, zoneid):
         """ return list of (administrative) connected clients and usage statistics
@@ -250,6 +306,8 @@ class DB(object):
                 result[row[0]] = row[1]
             prev_user = row[1]
         return result
+        return result
+
 
     def update_accounting_info(self, details):
         """ update internal accounting database with given ipfw info (not per zone)
@@ -257,7 +315,7 @@ class DB(object):
         """
         if type(details) == dict:
             # query registered data
-            sql = """ select    cc.ip_address, cc.zoneid, cc.sessionid
+            sql = """ select    cc.ip_address, cc.zoneid, cc.sessionid, cc.created cc_create_time
                       ,         si.rowid si_rowid, si.prev_packets_in, si.prev_bytes_in
                       ,         si.prev_packets_out, si.prev_bytes_out, si.last_accessed
                       from      cp_clients cc
@@ -280,15 +338,16 @@ class DB(object):
                         sql_new = """ insert into session_info(zoneid, sessionid, prev_packets_in, prev_bytes_in,
                                                                prev_packets_out, prev_bytes_out,
                                                                packets_in, packets_out, bytes_in, bytes_out,
-                                                               last_accessed)
+                                                               last_accessed,last_accounting)
                                       values (:zoneid, :sessionid, :packets_in, :bytes_in, :packets_out, :bytes_out,
-                                              :packets_in, :packets_out, :bytes_in, :bytes_out, :last_accessed)
+                                              :packets_in, :packets_out, :bytes_in, :bytes_out, :last_accessed, :last_accounting)
                         """
                         record['packets_in'] = details[record['ip_address']]['in_pkts']
                         record['bytes_in'] = details[record['ip_address']]['in_bytes']
                         record['packets_out'] = details[record['ip_address']]['out_pkts']
                         record['bytes_out'] = details[record['ip_address']]['out_bytes']
                         record['last_accessed'] = details[record['ip_address']]['last_accessed']
+                        record['last_accounting'] = int(record['cc_create_time'])
                         cur2.execute(sql_new, record)
                     else:
                         # update session
@@ -323,6 +382,8 @@ class DB(object):
                             record['bytes_in'] = details[record['ip_address']]['in_bytes']
                             record['bytes_out'] = details[record['ip_address']]['out_bytes']
 
+                        # record['cur_bytes_in'] = record['cur_bytes_in']
+                        # record['cur_bytes_out'] = record['cur_bytes_out']
                         record['prev_packets_in'] = details[record['ip_address']]['in_pkts']
                         record['prev_packets_out'] = details[record['ip_address']]['out_pkts']
                         record['prev_bytes_in'] = details[record['ip_address']]['in_bytes']

@@ -91,9 +91,14 @@ class AuthenticationFactory
      */
     public function listServers()
     {
+        $configObj = Config::getInstance()->object();
+        $session_timeout = (string)$configObj->OPNsense->captiveportal->zones->zone->hardtimeout;
+        $session_timeout = intval($session_timeout) * 60;
         $servers = array();
         $servers['Local Database'] = array("name" => "Local Database", "type" => "local");
-        $configObj = Config::getInstance()->object();
+        $servers['Portal Local'] = array("name" => "Portal Local","type" => "PortalLocal","session_timeout"=>$session_timeout);
+        $servers['Portal Center'] = array("name" => "Portal Center","type" => "PortalCenter","session_timeout"=>$session_timeout);
+
         foreach ($configObj->system->children() as $key => $value) {
             if ($key == 'authserver' && !empty($value->type) && !empty($value->name)) {
                 $authServerSettings = array();

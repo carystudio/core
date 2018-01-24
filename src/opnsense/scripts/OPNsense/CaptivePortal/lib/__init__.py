@@ -65,16 +65,13 @@ class Config(object):
                     for item in self._conf_handle.items(section):
                         result[zoneid][item[0]] = item[1]
                     # convert allowed(MAC)addresses string to list
-                    if 'allowedaddresses' in result[zoneid] and result[zoneid]['allowedaddresses'].strip() != '':
-                        result[zoneid]['allowedaddresses'] = \
-                            map(lambda x: x.strip(), result[zoneid]['allowedaddresses'].split(','))
-                    else:
-                        result[zoneid]['allowedaddresses'] = list()
-                    if 'allowedmacaddresses' in result[zoneid] and result[zoneid]['allowedmacaddresses'].strip() != '':
-                        result[zoneid]['allowedmacaddresses'] = \
-                            map(lambda x: x.strip(), result[zoneid]['allowedmacaddresses'].split(','))
-                    else:
-                        result[zoneid]['allowedmacaddresses'] = list()
+                    for conf_section in ['allowedaddresses', 'allowedmacaddresses', 'allowedwanaddresses', 'wanwhiteset1', 'wanwhiteset2', 'wanwhiteset3']:
+                        if conf_section in result[zoneid] and result[zoneid][conf_section].strip() != '':
+                            result[zoneid][conf_section] = \
+                                map(lambda x: x.strip(), result[zoneid][conf_section].split(','))
+                        else:
+                            result[zoneid][conf_section] = list()
+
         return result
 
     def fetch_template_data(self, zoneid):

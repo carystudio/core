@@ -1,8 +1,8 @@
 #!/usr/local/bin/php
 <?php
-
-/*
+/**
  *    Copyright (C) 2015 Deciso B.V.
+ *
  *    All rights reserved.
  *
  *    Redistribution and use in source and binary forms, with or without
@@ -25,16 +25,27 @@
  *    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  *    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *    POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 
 require_once('script/load_phalcon.php');
 
 use OPNsense\Auth\AuthenticationFactory;
+use \OPNsense\Core\Backend;
+use \OPNsense\PortalHelper;
 
+if(file_exists('/usr/local/opnsense/cs/tmp/portal_server')){
+    $server = file_get_contents('/usr/local/opnsense/cs/tmp/portal_server');
+    $gatewayid = file_get_contents('/usr/local/opnsense/cs/tmp/portal_gatewayid');
+    $mcode = file_get_contents('/usr/local/opnsense/cs/tmp/mcode.txt');
+    $ping_url = 'http://'.$server.'/c/api/v3/ping/?gw_id='.$gatewayid.'&mcode='.$mcode.'&sys_uptime=0&sys_memfree=0&sys_load=0&wifidog_uptime=0';
+    file_get_contents($ping_url);
+}
 // open database
-$database_filename = '/var/captiveportal/captiveportal.sqlite';
-$db = new SQLite3($database_filename);
-$db->busyTimeout(30000);
+//$database_filename = '/var/captiveportal/captiveportal.sqlite';
+//$db = new SQLite3($database_filename);
+//$db->busyTimeout(30000);
+$db = PortalHelper::getDbConn();
 
 // query all sessions with client restrictions
 $result = $db->query('
@@ -44,6 +55,16 @@ $result = $db->query('
     ,           c.authenticated_via
     ,           c.deleted
     ,           c.created
+    ,           c.ip_address
+    ,           c.mac_address
+    ,           si.prev_bytes_in
+    ,           si.prev_bytes_out
+    ,           si.bytes_in
+    ,           si.bytes_out
+    ,           si.cur_bytes_in
+    ,           si.cur_bytes_out
+    ,           si.last_accessed
+    ,           si.last_accounting
     ,           accs.state
     from        cp_clients c
     inner join  session_restrictions sr on sr.zoneid = c.zoneid and sr.sessionid = c.sessionid
@@ -82,12 +103,40 @@ if ($result !== false) {
                     $time_spend = time() - $row['created'];
                     $authenticator->stopAccounting($row['username'], $row['sessionid'], $time_spend);
                 }
+                if(method_exists($authenticator, 'centerStopAccounting')){
+                    $acctResult = $authenticator->centerStopAccounting($row);
+                }
             } elseif ($row['state'] != 'STOPPED') {
                 // send interim updates (if applicable)
                 if (method_exists($authenticator, 'updateAccounting')) {
                     // send interim update event
                     $time_spend = time() - $row['created'];
                     $authenticator->updateAccounting($row['username'], $row['sessionid'], $time_spend);
+                }
+                if(method_exists($authenticator, 'centerAccounting')){
+                    $acctResult = $authenticator->centerAccounting($row);
+                    if(is_array($acctResult) && "0" == $acctResult[1]){
+                        $res = $db->exec("update cp_clients set deleted=1 where sessionid='".$row['sessionid']."'");
+                        $res = $db->exec("update accounting_state set state = 'STOPPED' where zoneid = 0 and sessionid = '".$row['sessionid']."'");
+                        $backend = new Backend();
+                        $statusRAW = $backend->configdpRun(
+                            "captiveportal disconnect",
+                            array('0', $row['sessionid'], 'json')
+                        );
+                    }else if(is_array($acctResult) && "1" == $acctResult[1]){
+                        $res = $db->exec("update session_info set cur_bytes_in=cur_bytes_in+".($row['bytes_in']-$row['cur_bytes_in']).",cur_bytes_out=cur_bytes_out+".($row['bytes_out']-$row['cur_bytes_out'])." where sessionid='".$row['sessionid']."'");
+                    }
+                }else if(method_exists($authenticator, 'localAccounting')){
+                    $acctResult = $authenticator->localAccounting($row);
+                    if(0==$acctResult){
+                        $res = $db->exec("update cp_clients set deleted=1 where sessionid='".$row['sessionid']."'");
+                        $res = $db->exec("update accounting_state set state = 'STOPPED' where zoneid = 0 and sessionid = '".$row['sessionid']."'");
+                        $backend = new Backend();
+                        $statusRAW = $backend->configdpRun(
+                            "captiveportal disconnect",
+                            array('0', $row['sessionid'], 'json')
+                        );
+                    }
                 }
             }
         }

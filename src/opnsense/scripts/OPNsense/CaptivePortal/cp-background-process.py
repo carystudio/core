@@ -34,6 +34,7 @@ import syslog
 import traceback
 import subprocess
 sys.path.insert(0, "/usr/local/opnsense/site-python")
+import socket
 from lib import Config
 from lib.db import DB
 from lib.arp import ARP
@@ -61,6 +62,10 @@ class CPBackgroundProcess(object):
         """
         return self._conf_zone_info.keys()
 
+    def ip_check(self, ip):
+        q = ip.split('.')
+        return len(q) == 4 and len(filter(lambda x: x >= 0 and x <= 255, map(int, filter(lambda x: x.isdigit(), q)))) == 4
+
     def initialize_fixed(self):
         """ initialize fixed ip / hosts per zone
         """
@@ -85,9 +90,9 @@ class CPBackgroundProcess(object):
                         # when there's no session active, add a new one
                         # (only administrative, the sync process will add it if neccesary)
                         if ip_address is not None:
-                            self.db.add_client(zoneid, "---ip---", "", ip_address, "")
+                            self.db.add_client(zoneid, "---ip---", "", ip_address, "","0")
                         else:
-                            self.db.add_client(zoneid, "---mac---", "", "", mac_address)
+                            self.db.add_client(zoneid, "---mac---", "", "", mac_address,"0")
 
             # cleanup removed static sessions
             for dbclient in self.db.list_clients(zoneid):
@@ -100,6 +105,40 @@ class CPBackgroundProcess(object):
                         if dbclient['ipAddress'] != '':
                             self.ipfw.delete(zoneid, dbclient['ipAddress'])
                         self.db.del_client(zoneid, dbclient['sessionId'])
+
+            print cpzones[zoneid]['allowedwanaddresses']
+            for address in cpzones[zoneid]['allowedwanaddresses']:
+                if self.ip_check(address):
+                    self.ipfw.add_to_table(str(10+int(zoneid)), address)
+                elif ''!= address:
+                    res=socket.getaddrinfo(address,None)
+                    for item in res:
+                        self.ipfw.add_to_table(str(10+int(zoneid)), item[4][0])
+
+            for address in cpzones[zoneid]['wanwhiteset1']:
+                if self.ip_check(address):
+                    self.ipfw.add_to_table(str(30+int(zoneid)), address)
+                elif ''!= address:
+                    res=socket.getaddrinfo(address,None)
+                    for item in res:
+                        self.ipfw.add_to_table(str(30+int(zoneid)), item[4][0])
+
+            for address in cpzones[zoneid]['wanwhiteset2']:
+                if self.ip_check(address):
+                    self.ipfw.add_to_table(str(40+int(zoneid)), address)
+                elif ''!= address:
+                    res=socket.getaddrinfo(address,None)
+                    for item in res:
+                        self.ipfw.add_to_table(str(40+int(zoneid)), item[4][0])
+
+            for address in cpzones[zoneid]['wanwhiteset2']:
+                if self.ip_check(address):
+                    self.ipfw.add_to_table(str(50+int(zoneid)), address)
+                elif ''!= address:
+                    res=socket.getaddrinfo(address,None)
+                    for item in res:
+                        self.ipfw.add_to_table(str(50+int(zoneid)), item[4][0])
+
 
     def sync_zone(self, zoneid):
         """ Synchronize captiveportal zone.
@@ -137,6 +176,13 @@ class CPBackgroundProcess(object):
                         if int(cpzone_info['idletimeout']) > 0 and float(db_client['last_accessed']) > 0:
                             if (time.time() - float(db_client['last_accessed'])) / 60 > int(cpzone_info['idletimeout']):
                                 drop_session_reason = "session %s hit idletimeout" % db_client['sessionId']
+
+                    # check if hardtimeout is set and overrun for this session
+                    if 'hardtimeout' in cpzone_info and str(cpzone_info['hardtimeout']).isdigit():
+                        # hardtimeout should be set and we should have collected some session data from the client
+                        if int(cpzone_info['hardtimeout']) > 0 and float(db_client['startTime']) > 0:
+                            if (time.time() - float(db_client['startTime'])) / 60 > int(cpzone_info['hardtimeout']):
+                                drop_session_reason = "session %s hit hardtimeout" % db_client['sessionId']
 
                     # cleanup concurrent users
                     if 'concurrentlogins' in cpzone_info and int(cpzone_info['concurrentlogins']) == 0:
@@ -194,13 +240,13 @@ def main():
     """ Background process loop, runs as backend daemon for all zones. only one should be active at all times.
         The main job of this procedure is to sync the administration with the actual situation in the ipfw firewall.
     """
-    # perform integrity check and repair database if needed
+    perform integrity check and repair database if needed
     check_and_repair('/var/captiveportal/captiveportal.sqlite')
-
     last_cleanup_timestamp = 0
     bgprocess = CPBackgroundProcess()
     bgprocess.initialize_fixed()
 
+    time.sleep(10)
     while True:
         try:
             # open database

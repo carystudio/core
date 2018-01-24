@@ -30,12 +30,13 @@
 """
 import sys
 import ujson
+import subprocess
 from lib.db import DB
 from lib.arp import ARP
 from lib.ipfw import IPFW
 
 # parse input parameters
-parameters = {'username': '', 'ip_address': None, 'zoneid': None, 'authenticated_via': None, 'output_type': 'plain'}
+parameters = {'username': '', 'ip_address': None, 'zoneid': None, 'authenticated_via': None, 'output_type': 'plain', 'sessionid': ''}
 current_param = None
 for param in sys.argv[1:]:
     if len(param) > 1 and param[0] == '/':
@@ -59,7 +60,8 @@ if parameters['ip_address'] is not None and parameters['zoneid'] is not None:
                                authenticated_via=parameters['authenticated_via'],
                                username=parameters['username'],
                                ip_address=parameters['ip_address'],
-                               mac_address=mac_address
+                               mac_address=mac_address,
+                               sessionid=parameters['sessionid']
                                )
     # check if address is not already registered before adding it to the ipfw table
     if not cpIPFW.ip_or_net_in_table(table_number=parameters['zoneid'], address=parameters['ip_address']):

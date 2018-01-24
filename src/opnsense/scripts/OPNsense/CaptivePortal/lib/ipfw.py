@@ -79,6 +79,12 @@ class IPFW(object):
         """
         devnull = open(os.devnull, 'w')
         subprocess.call(['/sbin/ipfw', 'table', table_number, 'add', address], stdout=devnull, stderr=devnull)
+        if table_number == "0":
+            subprocess.call(['/sbin/pfctl', '-t', 'LAN1_TO_MULTIWAN', '-T', 'add', address], stdout=devnull, stderr=devnull)
+            f=file("/usr/local/opnsense/cs/tmp/portal_loginuser_ips.tmp","a+")
+            f.write(address.strip()+"\n")
+            f.close()
+
 
     @staticmethod
     def delete_from_table(table_number, address):
@@ -89,6 +95,22 @@ class IPFW(object):
         """
         devnull = open(os.devnull, 'w')
         subprocess.call(['/sbin/ipfw', 'table', table_number, 'delete', address], stdout=devnull, stderr=devnull)
+        if table_number == "0":
+            subprocess.call(['/sbin/pfctl', '-t', 'LAN1_TO_MULTIWAN', '-T', 'del', address], stdout=devnull, stderr=devnull)
+            if os.path.isfile('/usr/local/opnsense/cs/tmp/portal_loginuser_ips.tmp'):
+                f = open('/usr/local/opnsense/cs/tmp/portal_loginuser_ips.tmp','r')
+                ips = f.readlines()
+                f.close();
+            else:
+                ips = []
+            f = file("/usr/local/opnsense/cs/tmp/portal_loginuser_ips.tmp","w")
+            for line in ips:
+                if line != "\n" and line != address.strip()+"\n":
+                    f.write(line)
+            f.close()
+            f = file("/usr/local/opnsense/cs/tmp/portal_loginuser_ips.tmp1","w")
+            f.write(address)
+            f.close()
 
     @staticmethod
     def list_accounting_info():

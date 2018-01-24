@@ -4,7 +4,7 @@
 /*
  * Copyright (C) 2005 Scott Ullrich <sullrich@gmail.com>
  * Copyright (C) 2005 Colin Smith <ethethlay@gmail.com>
- * Copyright (C) 2009 Ermal Luçi
+ * Copyright (C) 2009 Ermal Lu<C3><A7>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,18 @@ require_once("config.inc");
 require_once("interfaces.inc");
 require_once("util.inc");
 
-$version = strtok(file_get_contents('/usr/local/opnsense/version/opnsense'), '-');
+$release = file_get_contents('/usr/local/etc/csg2000p_release');
+$release = explode('-', $release);
 $flavour = strtok(shell_exec('/usr/local/bin/openssl version'), ' ');
 $hostname = $config['system']['hostname'];
 $machine = trim(shell_exec('uname -p'));
 $domain = $config['system']['domain'];
-$product = $g['product_name'];
+$product = $release[0];
+if(isset($release[1])){
+    $version='v'.$release[1];
+}else{
+    $version = '';
+}
 
 print "\n*** {$hostname}.{$domain}: {$product} {$version} ({$machine}/${flavour}) ***\n";
 
