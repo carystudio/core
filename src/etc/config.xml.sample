@@ -110,6 +110,11 @@
       <value>default</value>
     </item>
     <item>
+      <descr><![CDATA[IP Fastforwarding]]></descr>
+      <tunable>net.inet.ip.fastforwarding</tunable>
+      <value>default</value>
+    </item>
+    <item>
       <descr><![CDATA[Do not delay ACK to try and piggyback it onto a data packet]]></descr>
       <tunable>net.inet.tcp.delayed_ack</tunable>
       <value>default</value>
@@ -184,7 +189,7 @@
     <optimization>normal</optimization>
     <hostname>CSG2000P</hostname>
     <domain>localdomain</domain>
-    <dnsallowoverride/>
+    <dnsallowoverride>1</dnsallowoverride>
     <group>
       <name>admins</name>
       <description><![CDATA[System Administrators]]></description>
@@ -213,6 +218,7 @@
     <nextuid>2000</nextuid>
     <nextgid>2000</nextgid>
     <timezone>Asia/Shanghai</timezone>
+    <time-update-interval>300</time-update-interval>
     <timeservers>1.asia.pool.ntp.org</timeservers>
     <webgui>
       <protocol>http</protocol>
@@ -234,8 +240,6 @@
     <kill_states/>
     <backupcount>60</backupcount>
     <crypto_hardware>aesni</crypto_hardware>
-    <pf_share_forward>1</pf_share_forward>
-    <lb_use_sticky>1</lb_use_sticky>
     <dnsserver>8.8.8.8</dnsserver>
     <dns1gw>WAN1_DHCP</dns1gw>
     <dns2gw>none</dns2gw>
@@ -250,7 +254,7 @@
   </system>
   <interfaces>
     <wan>
-      <enable>1</enable>
+      <enable/>
       <if>mismatch0</if>
       <descr>wan1</descr>
       <mtu/>
@@ -258,14 +262,14 @@
       <ipaddrv6>dhcp6</ipaddrv6>
       <subnet/>
       <gateway>WAN1_DHCP</gateway>
-      <blockbogons>1</blockbogons>
+      <blockbogons/>
       <dhcphostname/>
       <media/>
       <mediaopt/>
       <dhcp6-ia-pd-len>0</dhcp6-ia-pd-len>
     </wan>
     <lan>
-      <enable>1</enable>
+      <enable/>
       <if>mismatch1</if>
       <descr>lan1</descr>
       <ipaddr>192.168.10.1</ipaddr>
@@ -287,9 +291,6 @@
       </range>
     </lan>
   </dhcpd>
-  <unbound>
-    <enable>1</enable>
-  </unbound>
   <dnsmasq>
     <enable/>
     <hosts>
@@ -359,7 +360,7 @@
         <address>LAN1_TO_MULTIWAN</address>
       </source>
       <destination>
-        <any/>
+        <any>1</any>
       </destination>
     </rule>
     <rule>
@@ -372,7 +373,7 @@
         <any/>
       </source>
       <destination>
-        <any/>
+        <any>1</any>
       </destination>
     </rule>
   </filter>

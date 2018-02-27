@@ -75,7 +75,7 @@ captiveportal_prestart()
 captiveportal_start()
 {
     # if the API dispatcher is already running, we will assume all parts are running
-    if ! pgrep -qF /var/run/lighttpd-api-dispatcher.pid 2> /dev/null; then
+    if [ ! -f /var/run/lighttpd-api-dispatcher.pid ]; then
         echo "Starting API dispatcher"
         /usr/local/sbin/lighttpd -f /var/etc/lighttpd-api-dispatcher.conf
 
@@ -95,7 +95,7 @@ captiveportal_start()
                 # remove temp (flush)
                 rm -rf $CPWORKDIR/$zonedirname/tmp
             fi
-            mkdir -p $CPWORKDIR/$zonedirname/tmp
+            mkdir $CPWORKDIR/$zonedirname/tmp
             chmod 770 $CPWORKDIR/$zonedirname/tmp
 
             # sync default template
@@ -154,7 +154,6 @@ captiveportal_stop()
             rm /var/run/lighttpd-api-dispatcher.pid
         fi
     fi
-
     # stopping zone http servers
     for zoneid in $CPZONES
     do
@@ -181,7 +180,6 @@ captiveportal_stop()
       echo "stop captiveportal background job"
       /bin/pkill -TERM -F /var/run/captiveportal_job.db.pid
     fi
-
     captiveportal_cleanup_zones
 }
 

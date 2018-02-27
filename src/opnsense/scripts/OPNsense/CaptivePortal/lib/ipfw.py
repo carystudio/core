@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015 Ad Schellevis <ad@opnsense.org>
+    Copyright (c) 2015 Ad Schellevis
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
