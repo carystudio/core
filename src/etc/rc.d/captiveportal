@@ -60,6 +60,7 @@ captiveportal_cleanup_zones()
             done
             if [ "$is_installed" -eq 0 ]; then
                 echo "Uninstall : zone $installed_zoneid"
+                umount "$CPWORKDIR/zone$installed_zoneid/dev"
                 rm -rf "$CPWORKDIR/zone$installed_zoneid"
             fi
         fi
@@ -97,7 +98,11 @@ captiveportal_start()
             fi
             mkdir $CPWORKDIR/$zonedirname/tmp
             chmod 770 $CPWORKDIR/$zonedirname/tmp
-
+						
+						mkdir -p $CPWORKDIR/$zonedirname/dev
+            if ! mount -uw $CPWORKDIR/$zonedirname/dev 2> /dev/null; then
+                mount -t devfs devfs $CPWORKDIR/$zonedirname/dev
+            fi
             # sync default template
             if [ -d $CPCUSTOMTEMPLATE ]; then
                 cp -a $CPCUSTOMTEMPLATE/ $CPWORKDIR/$zonedirname/htdocs/
