@@ -300,6 +300,13 @@
         <descr>PORTAL_SERVER</descr>
         <aliases/>
      </hosts>
+     <hosts>
+        <host>wclogin</host>
+        <domain>local.totolink.cn</domain>
+        <ip>192.168.10.1</ip>
+        <descr>WeChat Local Login</descr>
+        <aliases/>
+     </hosts>
   </dnsmasq>
   <snmpd>
     <syslocation/>
