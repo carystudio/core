@@ -57,7 +57,11 @@ if len(sys.argv) > 1:
     # write zone settings
     filename = '%sjs/zone.js' % target_directory
     with open(filename, 'wb') as f_out:
-        f_out.write('var zoneid = %s' % zoneid)
+        f_out.write("var zoneid = %s;\n" % zoneid)
+        if os.path.isfile('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt'):
+            f_out.write('var wc_enable = "yes";')
+        else:
+            f_out.write('var wc_enable = "no";')
     os.chmod(filename, 0444)
 
 sys.exit(0)
