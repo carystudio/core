@@ -101,11 +101,14 @@ EOD;
 	}else if(2==$if_cnt){
 		$wanif = $ifnames[0];
 		$bridge_if = $ifnames[1];
+		$optif[] = $ifnames[1];
 	}else	if($if_cnt>2){
 		$wanif = $ifnames[0];
 		$bridge_if = $ifnames[1];
+		$optif[] = $ifnames[1];
 		for($i=2; $i<$if_cnt; $i++){
 			$bridge_if .= ','.$ifnames[$i];
+			$optif[] = $ifnames[$i];
 		}
 	}
 	
@@ -125,7 +128,7 @@ EOD;
 		$config['bridges']['bridged']['members'] = $bridge_if;
 
 		if ($new) {
-			$config['interfaces']['lan']['ipaddr'] = '192.168.1.1';
+			$config['interfaces']['lan']['ipaddr'] = '192.168.10.1';
 			$config['interfaces']['lan']['subnet'] = '24';
 			if ($wanif) {
 				$config['interfaces']['lan']['track6-interface'] = 'wan';
@@ -139,8 +142,8 @@ EOD;
 				$config['dhcpd']['lan']['range'] = array();
 			}
 			$config['dhcpd']['lan']['enable'] = true;
-			$config['dhcpd']['lan']['range']['from'] = '192.168.1.100';
-			$config['dhcpd']['lan']['range']['to'] = '192.168.1.199';
+			$config['dhcpd']['lan']['range']['from'] = '192.168.10.2';
+			$config['dhcpd']['lan']['range']['to'] = '192.168.10.254';
 			if (!is_array($config['nat'])) {
 				$config['nat'] = array();
 			}
@@ -209,9 +212,11 @@ EOD;
 
 	for ($i = 0; $i < count($optif); $i++) {
 		if (!is_array($config['interfaces']['opt' . ($i+1)]))
-			$config['interfaces']['opt' . ($i+1)] = array('enable'=>1, 'spoofmac'=>'');
+			$config['interfaces']['opt' . ($i+1)] = array();
 
 		$config['interfaces']['opt' . ($i+1)]['if'] = $optif[$i];
+		$config['interfaces']['opt' . ($i+1)]['enable'] = 1;
+		$config['interfaces']['opt' . ($i+1)]['spoofmac'] = '';
 
 		if (match_wireless_interface($optif[$i])) {
 			if (!is_array($config['interfaces']['opt' . ($i+1)]['wireless']))
