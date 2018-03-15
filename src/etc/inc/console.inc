@@ -237,7 +237,7 @@ EOD;
         }
 
         if (empty($config['interfaces']['opt' . ($i+1)]['descr'])) {
-            $config['interfaces']['opt' . ($i+1)]['descr'] = 'NA_'$optif[$i];
+            $config['interfaces']['opt' . ($i+1)]['descr'] = $optif[$i];
             //unset($config['interfaces']['opt' . ($i+1)]['enable']);
         }
     }
