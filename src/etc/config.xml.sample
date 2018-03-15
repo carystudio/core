@@ -521,22 +521,4 @@
         RXQ1IKR3QwWXRqUzZLVVN2a1cvcitnV1lUSGZWMGR3Ti9CS2thZkJEYmpFQ2dZQWMvTk5xeTlMYzY5Q2FSeVhFckRTYQo4VEZmSFFobnIzTHA5K00vbEpweVBvd1F6SWJxY3BZcXlKSTkycDNjakF5L1lxZzNLV0FtV2hSRFgzR2NoelJ
         RClpRWDE1OFl6L2h6R2VLTDRzeEw2Y3djYkNrc0ovWHplNitTSmVoUG1LVTJ1MXVyTElxR1J3VnJ2anJhblozRE0KZGZMNENwWnZpNnN3MVhSNldSYUN1QT09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K</prv>
      </cert>
-     <bridges>
-    	<bridged>
-	      <enablestp>1</enablestp>
-	      <descr>LAN</descr>
-	      <maxaddr/>
-	      <timeout/>
-	      <bridgeif>bridge0</bridgeif>
-	      <maxage/>
-	      <fwdelay/>
-	      <hellotime/>
-	      <priority/>
-	      <proto>rstp</proto>
-	      <holdcnt/>
-	      <members>opt1,opt2</members>
-	      <ifpriority/>
-	      <ifpathcost/>
-    	</bridged>
-  	</bridges>
 </opnsense>

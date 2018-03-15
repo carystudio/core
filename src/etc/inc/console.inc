@@ -122,10 +122,10 @@ EOD;
         $optif[] = $ifnames[1];
     }else	if($if_cnt>2){
         $wanif = $ifnames[0];
-        $bridge_if = $ifnames[1];
+        $bridge_if = 'opt1';
         $optif[] = $ifnames[1];
         for($i=2; $i<$if_cnt; $i++){
-            $bridge_if .= ','.$ifnames[$i];
+            $bridge_if .= ',opt'.$i;
             $optif[] = $ifnames[$i];
         }
     }
@@ -144,7 +144,21 @@ EOD;
         config_read_array('interfaces', 'lan');
         $config['interfaces']['lan']['if'] = $lanif;
         $config['interfaces']['lan']['enable'] = true;
-        $config['bridges']['bridged']['members'] = $bridge_if;
+        $config['bridges'] = array('bridged');
+        $config['bridges']['bridged'] = array('enablestp'=>1,
+	      'descr'=>'LAN',
+	      'maxaddr'=>'',
+	      'timeout'=>'',
+	      'bridgeif'=>'bridge0',
+	      'maxage'=>'',
+	      'fwdelay'=>'',
+	      'hellotime'=>'',
+	      'priority'=>'',
+	      'proto'=>'rstp',
+	      'holdcnt'=>'',
+	      'members'=>$bridge_if,
+	      'ifpriority'=>'',
+	      'ifpathcost'=>'');
 
         if ($new) {
             $config['interfaces']['lan']['ipaddr'] = '192.168.10.1';
@@ -223,7 +237,7 @@ EOD;
         }
 
         if (empty($config['interfaces']['opt' . ($i+1)]['descr'])) {
-            $config['interfaces']['opt' . ($i+1)]['descr'] = $optif[$i];
+            $config['interfaces']['opt' . ($i+1)]['descr'] = 'NA_'$optif[$i];
             //unset($config['interfaces']['opt' . ($i+1)]['enable']);
         }
     }
