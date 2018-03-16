@@ -1108,7 +1108,7 @@ function interface_vip_bring_down($vip)
     }
 }
 
-function interface_bring_down($interface = "wan", $ifacecfg = false)
+function interface_bring_down($interface = "wan", $destroy=false, $ifacecfg = false)
 {
     global $config;
 
