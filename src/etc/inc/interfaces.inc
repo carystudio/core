@@ -2670,7 +2670,7 @@ function interface_configure($interface = 'wan', $reloadall = false, $linkupeven
                 break;
         }
     }
-    $intf_stats = legacy_interface_stats();
+    $intf_stats = legacy_interface_stats($wancfg['if']);
     if (!empty($wancfg['mtu'])) {
         if (stristr($realif, "_vlan")) {
             // max mtu to parent

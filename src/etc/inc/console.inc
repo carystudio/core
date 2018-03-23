@@ -160,6 +160,17 @@ EOD;
 	      'ifpriority'=>'',
 	      'ifpathcost'=>'');
 
+        $config['filter']['rule'][] = array('type'=>'pass',
+            'interface'=>$bridge_if,
+            'ipprotocol'=>'inet',
+            'statetype'=>'keep state',
+            'descr'=>'LAN_BRIDGE_FORWARD',
+            'direction'=>'any',
+            'quick'=>'yes',
+            'floating'=>'yes',
+            'source'=>array('any'=>1),
+            'destination'=>array('any'=>1));
+
         if ($new) {
             $config['interfaces']['lan']['ipaddr'] = '192.168.10.1';
             $config['interfaces']['lan']['subnet'] = '24';
