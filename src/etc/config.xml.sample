@@ -219,7 +219,7 @@
     <nextgid>2000</nextgid>
     <timezone>Asia/Shanghai</timezone>
     <time-update-interval>300</time-update-interval>
-    <timeservers>1.asia.pool.ntp.org</timeservers>
+    <timeservers>pool.ntp.org cn.pool.ntp.org europe.pool.ntp.org</timeservers>
     <webgui>
       <protocol>http</protocol>
       <port>30008</port>
