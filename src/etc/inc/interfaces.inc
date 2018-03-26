@@ -1430,7 +1430,7 @@ startup:
 default:
 {$ppp['type']}client:
   create bundle static {$interface}
-  set bundle enable ipv6cp
+  set bundle enable ipv4cp
   set iface name {$ifcfg['if']}
 
 EOD;
@@ -2679,7 +2679,10 @@ function interface_configure($interface = 'wan', $reloadall = false, $linkupeven
                 legacy_interface_mtu($realif, $mtu);
             }
         } elseif ($wancfg['mtu'] != $intf_stats['mtu']) {
-            legacy_interface_mtu($realhwif, $wancfg['mtu']);
+	        log_error("DEBUG: realhwif:$realhwif realif:$realif statusmtu:".$intf_stats['mtu'].' cfg_mtu:'.$wancfg['mtu']);
+	        if(strpos($wancfg['if'], 'pppoe')===false || $intf_stats['mtu']>$wancfg['mtu']){
+                legacy_interface_mtu($realhwif, $wancfg['mtu']);
+		    }
         }
     }
 
