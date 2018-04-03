@@ -75,6 +75,22 @@ captiveportal_prestart()
 
 captiveportal_start()
 {
+    # check sqlite db file
+    if [ -f /var/captiveportal/captiveportal.sqlite ]; then
+        check="`/usr/local/bin/sqlite3 /var/captiveportal/captiveportal.sqlite "pragma integrity_check"`"
+        if [ "ok" != "$check" ]; then
+            echo ".output /var/captiveportal/db_recovery_tmp.sql">/var/captiveportal/db_recovery.sql
+            echo ".dump">>/var/captiveportal/db_recovery.sql
+            /usr/local/bin/sqlite3 /var/captiveportal/captiveportal.sqlite</var/captiveportal/db_recovery.sql
+            /bin/rm -f /var/captiveportal/captiveportal.sqlite
+            /usr/local/bin/sqlite3 /var/captiveportal/captiveportal.sqlite</var/captiveportal/db_recovery_tmp.sql
+            check="`/usr/local/bin/sqlite3 /var/captiveportal/captiveportal.sqlite "pragma integrity_check"`"
+            if [ "ok" != "$check" ]; then
+                /bin/rm -f /var/captiveportal/captiveportal.sqlite
+            fi
+        fi
+    fi
+
     # if the API dispatcher is already running, we will assume all parts are running
     if [ ! -f /var/run/lighttpd-api-dispatcher.pid ]; then
         echo "Starting API dispatcher"
