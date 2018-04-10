@@ -364,7 +364,8 @@ class DB(object):
                                          where  rowid = :si_rowid
                         """
                         # add usage to session
-                        record['last_accessed'] = details[record['ip_address']]['last_accessed']
+                        if details[record['ip_address']]['last_accessed'] != 0:
+                            record['last_accessed'] = details[record['ip_address']]['last_accessed']
                         if record['prev_packets_in'] <= details[record['ip_address']]['in_pkts'] and \
                            record['prev_packets_out'] <= details[record['ip_address']]['out_pkts']:
                             # ipfw data is still valid, add difference to use

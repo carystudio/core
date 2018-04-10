@@ -124,6 +124,9 @@ class PortalLocal implements IAuthConnector
         $db = PortalHelper::getDbConn();
         if($user['expire_time'] <= $t){
             if($user['remain_time']>0){
+                if(0 == $sessionInfo['last_accessed']){
+                    $sessionInfo['last_accessed'] = $sessionInfo['last_accounting'];
+                }
                 $usedtime = $sessionInfo['last_accessed'] - $sessionInfo['last_accounting'];
 
                 $sql="update users set remain_time=remain_time-".intval($usedtime)." where username='".$sessionInfo['username']."'";
