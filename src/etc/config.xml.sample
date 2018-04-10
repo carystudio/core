@@ -406,6 +406,7 @@
           <interface>openvpn</interface>
           <ipprotocol>inet</ipprotocol>
           <statetype>keep state</statetype>
+          <descr>OpenVPN_SUBNET_ACCEPT</descr>
           <source>
             <any>1</any>
           </source>
@@ -418,6 +419,7 @@
            <interface>wan</interface>
            <ipprotocol>inet</ipprotocol>
            <statetype>keep state</statetype>
+           <descr>OpenVPN_LISTEN_ACCEPT</descr>
            <protocol>tcp</protocol>
            <source>
              <any>1</any>
@@ -533,6 +535,13 @@
       zCmxQWS9mWWdDQWJ6eDluUEplNWswdUFRWXlldERxME5jMytmNVFVOFlxZTlSWkIxZllrSUlTdHFjMFBpcmdVa0gKTGJCQTdTVGlkSEtxOCsva2FrR3pTVVR3Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K</prv>
          <serial>3</serial>
       </ca>
+      <ca>
+          <refid>5ac9f07897dde</refid>
+          <descr>CSG200P_openvpn_client_server_ca</descr>
+          <serial>3</serial>
+          <crt></crt>
+          <prv></prv>
+      </ca>
       <cert>
          <refid>592fb0cf2dd36</refid>
          <descr>portal_server</descr>
@@ -565,40 +574,70 @@
         RXQ1IKR3QwWXRqUzZLVVN2a1cvcitnV1lUSGZWMGR3Ti9CS2thZkJEYmpFQ2dZQWMvTk5xeTlMYzY5Q2FSeVhFckRTYQo4VEZmSFFobnIzTHA5K00vbEpweVBvd1F6SWJxY3BZcXlKSTkycDNjakF5L1lxZzNLV0FtV2hSRFgzR2NoelJ
         RClpRWDE1OFl6L2h6R2VLTDRzeEw2Y3djYkNrc0ovWHplNitTSmVoUG1LVTJ1MXVyTElxR1J3VnJ2anJhblozRE0KZGZMNENwWnZpNnN3MVhSNldSYUN1QT09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K</prv>
      </cert>
+     <cert>
+         <refid>5ac9f213dd1fa</refid>
+         <descr>CSG2000P_openvpn_client</descr>
+         <crt></crt>
+         <prv></prv>
+         <caref>5ac9f07897dde</caref>
+       </cert>
      <openvpn>
-         <openvpn-server>
-               <mode>server_user</mode>
-               <protocol>TCP</protocol>
-               <dev_mode>tun</dev_mode>
-               <local_port>1194</local_port>
-               <description>openvpnsvr1</description>
-               <crypto>AES-128-CBC</crypto>
-               <digest>SHA1</digest>
-               <engine>none</engine>
-               <tunnel_network>10.0.8.0/24</tunnel_network>
-               <remote_network>192.168.90.0/24,192.168.91.0/24</remote_network>
-               <local_network>192.168.90.0/24</local_network>
-               <maxclients>100</maxclients>
-               <client2client>yes</client2client>
-               <pool_enable>yes</pool_enable>
-               <local_group>openvpn</local_group>
-               <dns_domain>vpn.csg200p.me</dns_domain>
-               <dns_server1>114.114.114.114</dns_server1>
-               <push_register_dns>yes</push_register_dns>
-               <netbios_ntype>0</netbios_ntype>
-               <no_tun_ipv6>yes</no_tun_ipv6>
-               <verbosity_level>1</verbosity_level>
-               <vpnid>1</vpnid>
-               <disable>1</disable>
-               <authmode>Local Database</authmode>
-               <interface>wan</interface>
-               <custom_options/>
-				<tls>Iw0KIyAyMDQ4IGJpdCBPcGVuVlBOIHN0YXRpYyBrZXkNCiMNCi0tLS0tQkVHSU4gT3BlblZQTiBTdGF0aWMga2V5IFYxLS0tLS0NCjA1MjExNTYzN2MyY2M1N2ZjMWFhMjc4ZGY0NDk4NzhiDQozNmFmYTY5MzVlNmNjNGNkYWViZTQ0YzI3OTFiYjA2OA0KMWQ0MTI3NmZkZGEzYjc3NTM1MjFkZDc2YWUyNjM0NmMNCmM5YmE2ZDI1ZGIyY2JkOGQwNDk3YmFlZTM3ODdmMzViDQo0Mzc0ZGMxZWViOTliMzFlOGY0ZGEwODg3MTg5ZDFjZQ0KMGE5YzNlYjUzZTY1N2ZmYzQ4NzZkN2ZkNjdiNDQ0NTgNCjZhMWZmMTI4NzkzOWIzMjFhNjI4MTIwYWZlMzdiOThhDQozZGM2ZmY5ZTRjNjQ0NTI1YmRkZTFiYjRlNjUzNDYyYg0KNjFhMDI5MTJjMWUzMDg2NTIxNjcwNGI2MzBhNzBlMGENCmI4YjNiMTU5MjJkMWJjN2FiZmYyNGZlMmEyOTFmYmVhDQpmN2VhZmM4NTBlNDI1ZWZkNTA5MTFmMGVkMTI0NDYzZQ0KZWExZDhkZTAzYWEyYWI1ZGMwYmUzYTkzZjg0YmQ1MzINCmI1ZTU3ZDRmNWE0NmFkZjA1YTk1YzliZjVjYTJlNDQ4DQo5ZTUzNzU5ZTI0MGZjMDFhZDNhMzkxYWE5MTQ1Zjc1MA0KOTZlNGM3OWRhMjA2MWMxMTdlYWUyOTYyYmI1ZTk0NjENCjlhN2Y0ZDE1MGM1NGVmMGIyNzE4ODExNmQzM2U0N2RmDQotLS0tLUVORCBPcGVuVlBOIFN0YXRpYyBrZXkgVjEtLS0tLQ0K</tls>
-               <caref>592fa6d7bf05a</caref>
-               <certref>592fb0cf2dd36</certref>
-               <dh_length>1024</dh_length>
-               <cert_depth>1</cert_depth>
-               <duplicate_cn>1</duplicate_cn>
-             </openvpn-server>
-       </openvpn>
+        <openvpn-server>
+            <mode>server_user</mode>
+            <protocol>TCP</protocol>
+            <dev_mode>tun</dev_mode>
+            <local_port>1194</local_port>
+            <description>openvpnsvr1</description>
+            <crypto>AES-128-CBC</crypto>
+            <digest>SHA1</digest>
+            <engine>none</engine>
+            <tunnel_network>10.0.8.0/24</tunnel_network>
+            <remote_network></remote_network>
+            <local_network></local_network>
+            <maxclients>100</maxclients>
+            <client2client>yes</client2client>
+            <pool_enable>yes</pool_enable>
+            <local_group>openvpn</local_group>
+            <dns_domain>vpn.csg200p.me</dns_domain>
+            <dns_server1>114.114.114.114</dns_server1>
+            <push_register_dns>yes</push_register_dns>
+            <netbios_ntype>0</netbios_ntype>
+            <no_tun_ipv6>yes</no_tun_ipv6>
+            <verbosity_level>1</verbosity_level>
+            <vpnid>1</vpnid>
+            <disable>1</disable>
+            <authmode>Local Database</authmode>
+            <interface>wan</interface>
+            <custom_options/>
+            <tls>Iw0KIyAyMDQ4IGJpdCBPcGVuVlBOIHN0YXRpYyBrZXkNCiMNCi0tLS0tQkVHSU4gT3BlblZQTiBTdGF0aWMga2V5IFYxLS0tLS0NCjA1MjExNTYzN2MyY2M1N2ZjMWFhMjc4ZGY0NDk4NzhiDQozNmFmYTY5MzVlNmNjNGNkYWViZTQ0YzI3OTFiYjA2OA0KMWQ0MTI3NmZkZGEzYjc3NTM1MjFkZDc2YWUyNjM0NmMNCmM5YmE2ZDI1ZGIyY2JkOGQwNDk3YmFlZTM3ODdmMzViDQo0Mzc0ZGMxZWViOTliMzFlOGY0ZGEwODg3MTg5ZDFjZQ0KMGE5YzNlYjUzZTY1N2ZmYzQ4NzZkN2ZkNjdiNDQ0NTgNCjZhMWZmMTI4NzkzOWIzMjFhNjI4MTIwYWZlMzdiOThhDQozZGM2ZmY5ZTRjNjQ0NTI1YmRkZTFiYjRlNjUzNDYyYg0KNjFhMDI5MTJjMWUzMDg2NTIxNjcwNGI2MzBhNzBlMGENCmI4YjNiMTU5MjJkMWJjN2FiZmYyNGZlMmEyOTFmYmVhDQpmN2VhZmM4NTBlNDI1ZWZkNTA5MTFmMGVkMTI0NDYzZQ0KZWExZDhkZTAzYWEyYWI1ZGMwYmUzYTkzZjg0YmQ1MzINCmI1ZTU3ZDRmNWE0NmFkZjA1YTk1YzliZjVjYTJlNDQ4DQo5ZTUzNzU5ZTI0MGZjMDFhZDNhMzkxYWE5MTQ1Zjc1MA0KOTZlNGM3OWRhMjA2MWMxMTdlYWUyOTYyYmI1ZTk0NjENCjlhN2Y0ZDE1MGM1NGVmMGIyNzE4ODExNmQzM2U0N2RmDQotLS0tLUVORCBPcGVuVlBOIFN0YXRpYyBrZXkgVjEtLS0tLQ0K</tls>
+            <caref>592fa6d7bf05a</caref>
+            <certref>592fb0cf2dd36</certref>
+            <dh_length>1024</dh_length>
+            <cert_depth>1</cert_depth>
+            <duplicate_cn>1</duplicate_cn>
+        </openvpn-server>
+        <openvpn-client>
+            <protocol>TCP</protocol>
+            <dev_mode>tun</dev_mode>
+            <server_addr>server.openvpn.org</server_addr>
+            <server_port>1194</server_port>
+            <proxy_authtype>none</proxy_authtype>
+            <description>openvpnclient1</description>
+            <mode>p2p_tls</mode>
+            <crypto>AES-128-CBC</crypto>
+            <digest>SHA1</digest>
+            <engine>rdrand</engine>
+            <compression>adaptive</compression>
+            <no_tun_ipv6>yes</no_tun_ipv6>
+            <route_no_pull>yes</route_no_pull>
+            <route_no_exec>yes</route_no_exec>
+            <verbosity_level>1</verbosity_level>
+            <interface>wan</interface>
+            <vpnid>2</vpnid>
+            <disable>1</disable>
+            <custom_options/>
+            <caref>5ac9f07897dde</caref>
+            <certref>5ac9f213dd1fa</certref>
+        </openvpn-client>
+      </openvpn>
 </opnsense>
