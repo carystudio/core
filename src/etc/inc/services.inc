@@ -1565,6 +1565,49 @@ function services_dhcrelay6_configure($verbose = false)
     }
 }
 
+function get_internet_ip($local_ip){
+	$server = array(
+		array('name'=>'taobao', 'url'=>'http://ip.taobao.com/service/getIpInfo2.php?ip=myip'),
+		array('name'=>'pconline', 'url'=>'http://whois.pconline.com.cn/ipJson.jsp?json=true'),
+		array('name'=>'3322', 'url'=>'http://ip.3322.net/')
+	);
+	foreach($server as $svr){
+		$ip_ch = curl_init($svr['url']);
+        	curl_setopt($ip_ch, CURLOPT_RETURNTRANSFER, 1);
+        	curl_setopt($ip_ch, CURLOPT_INTERFACE, $local_ip);
+        	curl_setopt($ip_ch, CURLOPT_CONNECTTIMEOUT, 10);
+        	curl_setopt($ip_ch, CURLOPT_TIMEOUT, 30);
+        	curl_setopt($ip_ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        	$ip_result = curl_exec($ip_ch);
+		$ip_address = '';
+        	if ($ip_result !== false) {
+			if('3322' == $svr['name']){
+				$ip_address = $ip_result;
+			}else if('taobao' == $svr['name'] || 'pconline' == $svr['name']){
+				$ip_info = json_decode($ip_result,true);
+				if(is_array($ip_info)){
+					if('taobao' == $svr['name']){
+						if(isset($ip_info['code']) && '0' ==$ip_info['code'] && isset($ip_info['data']) && isset($ip_info['data']['ip'])){
+							$ip_address = $ip_info['data']['ip'];
+						}
+					}else if('pconline' == $svr['name']){
+						if(isset($ip_info['ip'])){
+							$ip_address = $ip_info['ip'];
+						}
+					}
+				}
+			}
+        	} else {
+        	    log_error('Aborted IP detection: ' . curl_error($ip_ch));
+        	}
+		if(is_ipaddr($ip_address)){
+			return $ip_address;
+		}
+	}
+
+	return false;
+}
+
 function get_dyndns_ip($int, $ipver = 4)
 {
     global $config;
@@ -1587,7 +1630,7 @@ function get_dyndns_ip($int, $ipver = 4)
         curl_setopt($ip_ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ip_ch, CURLOPT_INTERFACE, $ip_address);
         curl_setopt($ip_ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ip_ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ip_ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ip_ch, CURLOPT_IPRESOLVE, $ipver == 6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4);
         $ip_result = curl_exec($ip_ch);
         if ($ip_result !== false) {
@@ -1595,6 +1638,9 @@ function get_dyndns_ip($int, $ipver = 4)
             $ip_address = trim($matches[1]);
         } else {
             log_error('Aborted IP detection: ' . curl_error($ip_ch));
+	    	if(4 == $ipver){
+				$ip_address = get_internet_ip($ip_address);
+	    	}
         }
         curl_close($ip_ch);
         if (($ipver == 6 && !is_ipaddrv6($ip_address)) || ($ipver != 6 && !is_ipaddrv4($ip_address))) {

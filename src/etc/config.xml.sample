@@ -542,6 +542,13 @@
           <crt></crt>
           <prv></prv>
       </ca>
+      <ca>
+            <refid>8e7ff0eg9bd8k</refid>
+            <descr>CSG200P_openvpn_server_ca</descr>
+            <serial>3</serial>
+            <crt></crt>
+            <prv></prv>
+      </ca>
       <cert>
          <refid>592fb0cf2dd36</refid>
          <descr>portal_server</descr>
@@ -580,14 +587,21 @@
          <crt></crt>
          <prv></prv>
          <caref>5ac9f07897dde</caref>
-       </cert>
+     </cert>
+     <cert>
+        <refid>oknd7234nhdgs</refid>
+        <descr>CSG2000P_openvpn_server</descr>
+        <crt></crt>
+        <prv></prv>
+        <caref>8e7ff0eg9bd8k</caref>
+     </cert>
      <openvpn>
         <openvpn-server>
             <mode>server_user</mode>
             <protocol>TCP</protocol>
             <dev_mode>tun</dev_mode>
             <local_port>1194</local_port>
-            <description>openvpnsvr1</description>
+            <description>CSG2000P_OVPN_SERVER</description>
             <crypto>AES-128-CBC</crypto>
             <digest>SHA1</digest>
             <engine>none</engine>
