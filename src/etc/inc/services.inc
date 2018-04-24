@@ -1636,13 +1636,15 @@ function get_dyndns_ip($int, $ipver = 4)
         if ($ip_result !== false) {
             preg_match('=<body>Current IP Address: (.*)</body>=siU', $ip_result, $matches);
             $ip_address = trim($matches[1]);
+            curl_close($ip_ch);
         } else {
             log_error('Aborted IP detection: ' . curl_error($ip_ch));
+            curl_close($ip_ch);
 	    	if(4 == $ipver){
 				$ip_address = get_internet_ip($ip_address);
 	    	}
         }
-        curl_close($ip_ch);
+
         if (($ipver == 6 && !is_ipaddrv6($ip_address)) || ($ipver != 6 && !is_ipaddrv4($ip_address))) {
             return 'down';
         }
