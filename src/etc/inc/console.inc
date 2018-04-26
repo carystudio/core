@@ -221,7 +221,7 @@ EOD;
         $config['interfaces']['wan']['ipaddrv6'] = 'dhcp6';
         $config['interfaces']['wan']['blockbogons'] = true;
         if ($lanif) {
-            $config['interfaces']['wan']['blockpriv'] = true;
+            //$config['interfaces']['wan']['blockpriv'] = true;
         }
 
         if (match_wireless_interface($wanif)) {
