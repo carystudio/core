@@ -370,7 +370,7 @@
       <descr><![CDATA[DEFAULT_ALLOW_MULTIWAN_RULE]]></descr>
       <interface>lan</interface>
       <source>
-        <address>LAN1_TO_MULTIWAN</address>
+        <address>LAN_TO_MULTIWAN</address>
       </source>
       <destination>
         <any>1</any>
@@ -487,7 +487,7 @@
     </gateways>
     <aliases>
         <alias>
-          <name>LAN1_TO_MULTIWAN</name>
+          <name>LAN_TO_MULTIWAN</name>
           <type>network</type>
           <descr>LAN1_TO_MULTIWAN</descr>
           <address>192.168.10.0/24</address>
