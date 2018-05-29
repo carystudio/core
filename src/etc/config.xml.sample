@@ -556,8 +556,6 @@
             <engine>rdrand</engine>
             <compression>adaptive</compression>
             <no_tun_ipv6>yes</no_tun_ipv6>
-            <route_no_pull>yes</route_no_pull>
-            <route_no_exec>yes</route_no_exec>
             <verbosity_level>1</verbosity_level>
             <interface>wan</interface>
             <vpnid>2</vpnid>
